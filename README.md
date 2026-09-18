@@ -1,13 +1,34 @@
-# NETWORKWALKS-B083-WEEK-2-PM1-CYBERSECURITY-FOOTPRINTING-WITH-MULTIPLE-TOOLS
-Footprinting using six built-in Kali Linux tools: whois, whatweb, nslookup, curl, wafw00f and dnsrecon.
+# Cybersecurity — Week 2: Reconnaissance Labs
 
-📌 Project Overview
+**Program:** Cybersecurity at Networkwalks
+**Batch:** B083 | **Week:** 2
+**Labs covered:**
+PM1 – Footprinting with Multiple Tools 
+PM5 – Network Scanning with Zenmap
 
-This project focuses on **footprinting** — the process of gathering publicly available information about a target domain before any active testing takes place. Using six tools that ship with Kali Linux by default, I collected domain registration data, technology stack details, DNS records, and WAF (Web Application Firewall) information for a target domain.
+## 📌 Overview
 
-Footprinting is entirely passive/low-noise reconnaissance: no exploitation is performed, only publicly accessible information is gathered.
+This README combines two related reconnaissance labs from Week 2. Both labs sit in the same phase of a security assessment — gathering information before any active testing — but they operate at different layers:
 
- 🎯 Objectives
+- **Project 1 (Footprinting)** gathers *publicly available* information about an external domain (WHOIS, DNS, web stack, WAF) using passive OSINT tools.
+- **Project 2 (Network Scanning with Zenmap)** performs *active discovery* on a local/private network to identify which hosts are alive, using Zenmap (the Nmap GUI).
+
+Together they illustrate the two common starting points of recon: passive footprinting of an internet-facing target, and active host discovery on a network you control.
+
+## 📑 Table of Contents
+
+1. [Project 1: Footprinting with Multiple Tools](#project-1-footprinting-with-multiple-tools)
+2. [Project 2: Network Scanning with Zenmap](#project-2-network-scanning-with-zenmap)
+3. [Combined Takeaways](#-combined-takeaways)
+4. [Security & Ethical Use](#-security--ethical-use)
+
+---
+
+## Project 1: Footprinting with Multiple Tools
+
+Footprinting using six built-in Kali Linux tools: `whois`, `whatweb`, `nslookup`, `curl`, `wafw00f`, and `dnsrecon`.
+
+### 🎯 Objectives
 
 - Gather domain registration (WHOIS) details for the target.
 - Fingerprint the web technologies running on the target site.
@@ -17,25 +38,22 @@ Footprinting is entirely passive/low-noise reconnaissance: no exploitation is pe
 - Enumerate DNS records (SOA, NS, MX, TXT, SRV) for the domain.
 - Document commands, output, and key takeaways for each tool.
 
----
+### 🛠️ Tools Used
 
-## 🛠️ Tools Used
+| 🧰 Tool | 🎯 Purpose |
+|---|---|
+| `whois` | Domain registration details (registrar, dates, name servers) |
+| `whatweb` | Web technology fingerprinting (CMS, server, frameworks) |
+| `nslookup` | DNS resolution — maps the domain to its IP address |
+| `curl -I` | Retrieves raw HTTP response headers from the target |
+| `wafw00f` | Detects the presence of a Web Application Firewall (WAF) |
+| `dnsrecon` | Broader DNS enumeration (SOA, NS, MX, TXT, SRV records) |
 
-| 🧰 Tool       | 🎯 Purpose                                             |
-| ------------- | ------------------------------------------------------- |
-| `whois`       | Domain registration details (registrar, dates, name servers) |
-| `whatweb`     | Web technology fingerprinting (CMS, server, frameworks)  |
-| `nslookup`    | DNS resolution — maps the domain to its IP address       |
-| `curl -I`     | Retrieves raw HTTP response headers from the target       |
-| `wafw00f`     | Detects the presence of a Web Application Firewall (WAF) |
-| `dnsrecon`    | Broader DNS enumeration (SOA, NS, MX, TXT, SRV records)   |
+> **Note:** All lookups performed here are passive, publicly available OSINT queries against a domain used for authorized training purposes. No active exploitation or unauthorized access was attempted.
 
-**Note:** All lookups performed here are passive, publicly available OSINT (Open-Source Intelligence) queries against a domain used for authorized training purposes. No active exploitation or unauthorized access was attempted.
+### 🪜 Procedure & Findings
 
-
-# 🪜 Footprinting Procedure & Findings
-
-## 1. WHOIS Lookup
+#### 1. WHOIS Lookup
 
 ```bash
 whois networkwalks.com
@@ -51,7 +69,7 @@ whois networkwalks.com
 
 WHOIS reveals who owns a domain, when it was registered, and which name servers manage its DNS — useful as a starting point for understanding a target's infrastructure and hosting provider.
 
-2. Web Technology Fingerprinting
+#### 2. Web Technology Fingerprinting
 
 ```bash
 whatweb networkwalks.com
@@ -66,7 +84,7 @@ whatweb networkwalks.com
 
 `whatweb` fingerprints the software stack behind a website, which helps identify known vulnerabilities tied to specific CMS or plugin versions later in a real assessment.
 
-## 3. DNS Resolution
+#### 3. DNS Resolution
 
 ```bash
 nslookup networkwalks.com
@@ -78,7 +96,7 @@ nslookup networkwalks.com
 
 `nslookup` confirms the domain-to-IP mapping — a quick sanity check before running any tool that needs the target's actual IP.
 
- 4. HTTP Header Inspection
+#### 4. HTTP Header Inspection
 
 ```bash
 curl -I https://networkwalks.com
@@ -93,7 +111,7 @@ curl -I https://networkwalks.com
 
 Raw HTTP headers often reveal server software, caching layers, and security headers (or the lack of them) without needing to load the full page.
 
- 5. WAF Detection
+#### 5. WAF Detection
 
 ```bash
 wafw00f networkwalks.com
@@ -105,7 +123,7 @@ wafw00f networkwalks.com
 
 Knowing a WAF is in place ahead of time is important — it explains why certain scans or payloads might get blocked or rate-limited later, and shapes how testing would need to be approached in a real engagement.
 
-6. DNS Enumeration
+#### 6. DNS Enumeration
 
 ```bash
 dnsrecon -d networkwalks.com
@@ -121,22 +139,115 @@ dnsrecon -d networkwalks.com
 
 `dnsrecon` gives a much fuller picture of a domain's DNS footprint than a single `nslookup` — mail servers, SPF policy, and autodiscover records can reveal hosting/email providers and additional attack surface.
 
+### 💡 What I Learned (Project 1)
+
+1. **Footprinting is entirely passive** — every tool used here queries publicly available information; no packets are sent that could be considered an attack. This makes footprinting a safe, legal first phase of any security assessment.
+2. **Multiple tools, overlapping but different data** — `nslookup`, `dnsrecon`, and `whatweb` all touched on IP/DNS information, but each surfaced different details, reinforcing that a proper footprint uses several tools rather than relying on just one.
+3. **WAF awareness matters early** — discovering a WAF in front of the target (via `wafw00f`) is valuable before any later scanning, since it explains unexpected blocks and shapes testing strategy.
+4. **Documentation discipline** — recording the exact command, the raw output, and a short interpretation for each tool made the findings far easier to compare and reference later.
+
 ---
 
- 💡 What I Learned
+## Project 2: Network Scanning with Zenmap
 
- 1. Footprinting is Entirely Passive
-Every tool used here queries publicly available information — no packets are sent that could be considered an attack. This makes footprinting a safe, legal first phase of any security assessment.
+Discovering live hosts on a local network using Zenmap (the Nmap GUI).
 
-2. Multiple Tools, Overlapping but Different Data
-`nslookup`, `dnsrecon`, and `whatweb` all touched on IP/DNS information, but each surfaced different details — reinforcing that a proper footprint uses several tools rather than relying on just one.
+### 🎯 Objectives
 
-3. WAF Awareness Matters Early
-Discovering a WAF in front of the target (via `wafw00f`) is valuable before any later scanning, since it explains unexpected blocks and shapes testing strategy.
+- Review the host machine's network adapters and IP configuration.
+- Identify a target IP address on the local network to scan.
+- Run a ping scan in Zenmap to check if the target host is alive.
+- Interpret the scan output and understand what a ping scan does (and doesn't) reveal.
+- View the scan result as a network topology diagram.
+- Understand Zenmap's topology legend (host status icons, colors, and connection types).
 
-4. Documentation Discipline
-Recording the exact command, the raw output, and a short interpretation for each tool made the findings far easier to compare and reference later.
+### 🛠️ Tools Used
 
-🔐 Security & Ethical Use
+| 🧰 Tool | 🎯 Purpose |
+|---|---|
+| `ipconfig /all` | Reviews the host's network adapters and assigned IPs |
+| Zenmap | GUI front-end for Nmap — used to configure and run scans |
+| Nmap (`nmap -sn`) | Underlying scan engine; `-sn` performs a host-discovery / ping scan without port scanning |
 
-All footprinting activity in this project was performed against a domain used for authorized training purposes as part of the Networkwalks Cybersecurity program. These techniques should only be used against systems you own or have explicit written permission to test.
+### ⚙️ Environment
+
+| 🧩 Component | ⚙️ Details |
+|---|---|
+| Host OS | Windows |
+| Relevant adapter | Ethernet 2 (VirtualBox Host-Only Network) — `192.168.56.1/24` |
+| Wi-Fi adapter | `10.201.40.243/24` (separate network, not scanned) |
+| Scan target | `192.168.56.1` |
+| Scan type | Ping scan (`nmap -sn`) |
+
+### 🪜 Procedure & Findings
+
+#### 1. Review Network Configuration
+
+```cmd
+ipconfig /all
+```
+
+Running `ipconfig` on the host first confirmed which network adapters were active and what IP ranges were in use. The relevant adapter for this scan was **Ethernet 2**, a VirtualBox Host-Only network adapter assigned `192.168.56.1` with subnet mask `255.255.255.0`. Other adapters (main Ethernet, most Wireless LAN adapters, Bluetooth Network Connection) showed as disconnected, and the Wi-Fi adapter was on a separate `10.201.40.x` network not used for this scan.
+
+#### 2. Run a Ping Scan in Zenmap
+
+**Target:** `192.168.56.1`
+**Profile:** Ping scan
+**Command generated by Zenmap:**
+
+```bash
+nmap -sn 192.168.56.1
+```
+
+**Output:**
+
+```
+Starting Nmap 7.991 ( https://nmap.org ) at 2026-09-18 14:04 +0200
+Nmap scan report for 192.168.56.1
+Host is up.
+Nmap done: 1 IP address (1 host up) scanned in 0.99 seconds
+```
+
+A ping scan (`-sn`) simply checks whether a host is up — it does not scan ports or attempt to identify running services. It's typically the first step in reconnaissance: confirm a host is alive before investing time in a deeper scan.
+
+#### 3. Visualize the Scan with the Topology Viewer
+
+Zenmap's **Topology** tab plotted the scanned host as a node connected to `localhost`, giving a simple visual map of the one live host found on the `192.168.56.1` network.
+
+#### 4. Review the Topology Legend
+
+The Topology Legend clarifies how to read the diagram:
+
+- **Circle color** indicates how many open ports a host has (green = fewer than 3, yellow = 3–6, red = more than 6).
+- **Square icons with green/yellow/red** mark a host as a router, switch, or wireless access point.
+- **Line style** between hosts shows traceroute information — solid for the primary path, dashed for missing or no traceroute data, and line thickness reflects round-trip time.
+- Additional icons distinguish routers, switches, wireless access points, firewalls, and hosts with filtered ports.
+
+Since this was a ping scan only (no port scan), the host appeared without port-count coloring, since it hadn't been port-scanned yet.
+
+### 💡 What I Learned (Project 2)
+
+1. **Ping scans are a discovery step, not a full scan** — `nmap -sn` only tells you whether a host is alive; it's a fast, low-noise way to build a list of live targets before running heavier scans (e.g., port or service scans) against them.
+2. **Zenmap translates GUI choices into real Nmap commands** — selecting a scan profile (like "Ping scan") in Zenmap automatically builds the equivalent Nmap command line, a useful way to learn Nmap syntax while still using a visual interface.
+3. **Knowing your own network config first matters** — running `ipconfig` before scanning made it clear which adapter and IP range to target, avoiding wasted scans against the wrong network (e.g., the Wi-Fi network instead of the VirtualBox host-only network).
+4. **The topology view adds context** — the topology diagram and its legend make it easier to interpret scan results at a glance, especially once more hosts and open ports are involved in later, more advanced scans.
+
+---
+
+## 💡 Combined Takeaways
+
+- Recon splits naturally into **passive** (footprinting — WHOIS, DNS, HTTP headers, WAF detection) and **active** (host discovery — ping scans) phases, and both are typically completed before any exploitation is attempted.
+- No single tool tells the whole story: each lab used multiple tools that overlapped in places (e.g., DNS resolution appearing in both `nslookup`/`dnsrecon` and, conceptually, `ipconfig` for local addressing) but each contributed unique details.
+- Understanding your own environment first — whether that's your local network adapters or the target's DNS/hosting setup — prevents wasted effort and wrong-target mistakes.
+- Visualizing results (Zenmap's topology view) and documenting commands/output/interpretation (footprinting write-up) both make findings far easier to review and build on later.
+
+## 🔐 Security & Ethical Use
+
+- The **footprinting** activity was performed against a domain used for authorized training purposes as part of the Networkwalks Cybersecurity program.
+- The **network scan** was performed against a host-only virtual network adapter under my own control, strictly for learning purposes.
+
+These techniques should only ever be used against systems and networks you own or have explicit written permission to test.
+
+---
+
+**Program:** Cybersecurity at Networkwalks | **Projects:** Footprinting with Multiple Tools · Network Scanning with Zenmap
